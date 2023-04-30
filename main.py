@@ -108,7 +108,7 @@ def create_bucket(bucket_name, region):
         print('Error:', e)
 
 
-def s3_upload(file_name, bucket_name, s3_obj_name):
+def s3_upload_file(file_name, bucket_name, s3_obj_name):
     s3_client = boto3.client('s3')
     try:
         response = s3_client.upload_file(Filename=file_name, Bucket=bucket_name, Key=s3_obj_name)
@@ -126,7 +126,7 @@ def s3_upload(file_name, bucket_name, s3_obj_name):
         print('S3 file error:', e)
 
 
-def s3_delete(bucket_name, s3_obj_name):
+def s3_delete_file(bucket_name, s3_obj_name):
     s3_client = boto3.client('s3')
     try:
         response = s3_client.delete_object(Bucket=bucket_name, Key=s3_obj_name)
@@ -151,7 +151,7 @@ def destroy_bucket(bucket_name):
 
         if 'Contents' in objects:
             for obj in objects['Contents']:
-                s3_delete(bucket_name, obj['Key'])
+                s3_delete_file(bucket_name, obj['Key'])
 
         response = s3_client.delete_bucket(Bucket=bucket_name)
 
@@ -160,23 +160,6 @@ def destroy_bucket(bucket_name):
         return response
     except botocore.exceptions.ClientError as e:
         print('Error:', e)
-
-
-# destroy_bucket("labpti")
-#
-# # upload('/Users/andrew/Downloads/annual-enterprise-survey-2019-financial-year-provisional-csv.csv', 'labpti', 'data.csv')
-#
-# create_bucket("labpti", "us-west-2")
-#
-# s3 = boto3.client('s3')
-# response = s3.list_buckets()
-#
-# print('Existing buckets:')
-#
-# for bucket in response['Buckets']:
-#     print(f' {bucket["Name"]}')
-#
-# create_instance()
 
 
 def main():
@@ -189,16 +172,17 @@ def main():
     instance_type = "t4g.nano"
     ami_id = "ami-0b0154d3d8011b0cd"
 
-    # instance_id = create_instance(instance_type, key_pair_name, region_name, ami_id)
-    # get_public_ip(instance_id, region_name)
-    # stop_instance(instance_id, region_name)
-    # terminate_instance(instance_id, region_name)
+    instance_id = create_instance(instance_type, key_pair_name, region_name, ami_id)
+    get_public_ip(instance_id, region_name)
+    stop_instance(instance_id, region_name)
+    terminate_instance(instance_id, region_name)
 
     bucket_name = "lnu-lab4-b1"
 
-    # create_bucket(bucket_name, region_name)
-    # s3_delete(bucket_name, "file1.csv")
-    destroy_bucket()
+    create_bucket(bucket_name, region_name)
+    s3_upload_file("usd_course.csv", bucket_name, "usd.csv")
+    s3_delete_file(bucket_name, "file1.csv")
+    destroy_bucket(bucket_name)
 
 
 if __name__ == '__main__':
